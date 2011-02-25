@@ -60,6 +60,7 @@ describe SlotMachine do
     before(:each) do
       @sm.mode = :idle
       @sm.power_on = true
+      @sm.save
     end
 
     it "turn_on! should raise error" do

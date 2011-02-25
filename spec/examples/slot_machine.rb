@@ -35,11 +35,13 @@ class SlotMachine
 
   def power_up
     self.power_on = true
+    save
     @log << [:power_up, Time.now]
   end
 
   def power_down
     self.power_on = false
+    save
     @log << [:power_down, Time.now]
   end
 
