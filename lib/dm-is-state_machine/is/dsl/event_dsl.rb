@@ -46,7 +46,6 @@ module DataMapper
 
           # ===== Define methods =====
           define_method("#{name}!") do
-            puts "transitioning to #{name.inspect}"
             transition!(name)
           end
 
