@@ -56,7 +56,7 @@ module DataMapper
         # end
 
         before :destroy do
-          if @state_machine.find_event(:destroy)
+          if state_machine.find_event(:destroy)
             transition!(:destroy)
           end
         end
@@ -102,18 +102,17 @@ module DataMapper
         def initialize(*args)
           super
           # ===== Run :enter hook if present =====
-          return unless is_sm = model.instance_variable_get(:@is_state_machine)
-          return unless definition = is_sm[:definition]
-          @state_machine = Data::Machine.new(definition, self)
-          @state_machine.run_initial
+          state_machine.run_initial
         end
 
         def transition!(event_name)
-          @state_machine.fire_event(event_name)
+          state_machine.fire_event(event_name)
         end
 
         def state_machine
-          @state_machine
+          return unless is_sm = model.instance_variable_get(:@is_state_machine)
+          return unless definition = is_sm[:definition]
+          Data::Machine.new(definition, self)
         end
 
       end # InstanceMethods
