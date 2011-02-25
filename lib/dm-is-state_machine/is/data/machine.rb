@@ -33,6 +33,14 @@ module DataMapper
             @definition.find_event(event_name)
           end
 
+          def state?(state_name)
+            if @definition.find_state(state_name)
+              current_state_name == state_name.to_s
+            else
+              raise InvalidState.new("Invalid state: #{state_name.inspect}")
+            end
+          end
+
           def fire_event(event_name)
             transition = @definition.fire_event(event_name, current_state_name)
 

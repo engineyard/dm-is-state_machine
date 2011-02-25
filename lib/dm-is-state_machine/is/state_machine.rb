@@ -109,6 +109,10 @@ module DataMapper
           state_machine.fire_event(event_name)
         end
 
+        def state?(state_name)
+          state_machine.state?(state_name)
+        end
+
         def state_machine
           return unless is_sm = model.instance_variable_get(:@is_state_machine)
           return unless definition = is_sm[:definition]
