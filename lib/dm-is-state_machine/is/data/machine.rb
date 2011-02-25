@@ -35,7 +35,7 @@ module DataMapper
           end
 
           def fire_event(event_name)
-            transition = @definition.fire_event(event_name, self)
+            transition = @definition.fire_event(event_name, current_state_name)
 
             if via_state_name = transition[:via]
               self.current_state_name = via_state_name
@@ -97,17 +97,19 @@ module DataMapper
           # Fire (activate) the event with name +event_name+
           #
           # @api public
-          def fire_event(event_name, machine)
+          def fire_event(event_name, current_state_name)
             event_name = event_name.to_s
             unless event = find_event(event_name)
               raise InvalidEvent, "Could not find event (#{event_name.inspect})"
             end
             transition = event.transitions.find do |t|
-               t[:from].to_s == machine.current_state_name
+               Array(t[:from]).any? do |from_state|
+                 from_state.to_s == current_state_name
+               end
             end
             unless transition
               raise InvalidEvent, "Event (#{event_name.inspect}) does not " +
-              "exist for current state (#{machine.current_state_name.inspect})"
+              "exist for current state (#{current_state_name.inspect})"
             end
             transition
           end
