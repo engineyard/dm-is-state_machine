@@ -26,31 +26,28 @@ module DataMapper
         # +transition+ takes a hash where <tt>:to</tt> is the state to transition
         # to and <tt>:from</tt> is a state (or Array of states) from which this
         # event can be fired.
-        def event(name, options = {}, &block)
+        def event(name, &block)
           unless state_machine_context?(:is)
             raise InvalidContext, "Valid only in 'is :state_machine' block"
           end
 
-          name = name.to_s
+          if method_defined?("#{name}!")
+            raise InvalidEvent, "There is a method called #{name}! on #{self}"
+          end
 
-          options[:method] = true unless options.key?(:method)
+          event_object = create_event(name)
 
           # ===== Setup context =====
-          definition = @is_state_machine[:definition]
-          event = Data::Event.new(name, definition)
-          definition.events << event
           @is_state_machine[:event] = {
             :name   => name,
-            :object => event
+            :object => event_object
           }
           push_state_machine_context(:event)
 
           # ===== Define methods =====
-          if options[:method]
-            define_method("#{name}!") do
-              puts "transitioning to #{name.inspect}"
-              transition!(name)
-            end
+          define_method("#{name}!") do
+            puts "transitioning to #{name.inspect}"
+            transition!(name)
           end
 
           # Possible alternative to the above:
@@ -68,6 +65,31 @@ module DataMapper
 
           # ===== Teardown context =====
           pop_state_machine_context
+        end
+
+        def destroy(options)
+          unless state_machine_context?(:is)
+            raise InvalidContext, "Valid only in 'is :state_machine' block"
+          end
+
+          event_object = create_event(:destroy)
+          from = options[:from]
+          to   = options[:to]
+          via  = options[:via]
+          event_object.add_transition(from, to, via)
+        end
+
+        def create_event(name)
+          unless state_machine_context?(:is)
+            raise InvalidContext, "Valid only in 'is :state_machine' block"
+          end
+
+          name = name.to_s
+
+          definition = @is_state_machine[:definition]
+          event = Data::Event.new(name, definition)
+          definition.events << event
+          event
         end
 
         def transition(options)
