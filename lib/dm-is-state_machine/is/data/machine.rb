@@ -11,7 +11,6 @@ module DataMapper
 
           def run_initial
             return unless initial
-            @resource.attribute_set(@definition.column, initial)
             return unless initial_state = @definition.find_state(initial)
             run_hook_if_present initial_state.options[:enter]
           end
