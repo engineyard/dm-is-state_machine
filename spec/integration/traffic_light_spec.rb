@@ -4,7 +4,7 @@ require 'examples/traffic_light'
 describe TrafficLight do
 
   before(:each) do
-    @t = TrafficLight.new
+    @t = TrafficLight.create
   end
 
   it "should have a 'color' column" do
@@ -50,11 +50,11 @@ describe TrafficLight do
       @t.forward!
       @t.color.should == "green"
       @t.log.should == %w(G Y R G)
-      @t.should be_new
     end
 
     it "should skip to :yellow then transition to :red, :green, :yellow" do
       @t.color = :yellow
+      @t.save
       @t.color.should == "yellow"
       @t.log.should == %w(G)
       @t.forward!
@@ -66,11 +66,11 @@ describe TrafficLight do
       @t.forward!
       @t.color.should == "yellow"
       @t.log.should == %w(G R G Y)
-      @t.should be_new
     end
 
     it "should skip to :red then transition to :green, :yellow, :red" do
       @t.color = :red
+      @t.save
       @t.color.should == "red"
       @t.log.should == %w(G)
       @t.forward!
@@ -82,7 +82,6 @@ describe TrafficLight do
       @t.forward!
       @t.color.should == "red"
       @t.log.should == %w(G G Y R)
-      @t.should be_new
     end
 
   end
@@ -105,11 +104,11 @@ describe TrafficLight do
       @t.backward!
       @t.color.should == "green"
       @t.log.should == %w(G R Y G)
-      @t.should be_new
     end
 
     it "should skip to :yellow then transition to :green, :red, :yellow" do
       @t.color = :yellow
+      @t.save
       @t.color.should == "yellow"
       @t.log.should == %w(G)
       @t.backward!
@@ -121,11 +120,11 @@ describe TrafficLight do
       @t.backward!
       @t.color.should == "yellow"
       @t.log.should == %w(G G R Y)
-      @t.should be_new
     end
 
     it "should skip to :red then transition to :yellow, :green, :red" do
       @t.color = :red
+      @t.save
       @t.color.should == "red"
       @t.log.should == %w(G)
       @t.backward!
@@ -137,7 +136,6 @@ describe TrafficLight do
       @t.backward!
       @t.color.should == "red"
       @t.log.should == %w(G Y G R)
-      @t.should be_new
     end
 
   end
