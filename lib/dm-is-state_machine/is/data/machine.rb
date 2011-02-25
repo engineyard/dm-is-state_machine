@@ -59,14 +59,11 @@ module DataMapper
 
           def current_state_name=(state_name)
             # == Run :exit hook (if present) ==
-            puts "exiting #{current_state_name}"
             run_hook_if_present current_state.options[:exit]
 
             @resource.update(@definition.column => state_name.to_s)
-            puts "state set to #{state_name}"
 
             # == Run :enter hook (if present) ==
-            puts "entering #{current_state_name}"
             run_hook_if_present current_state.options[:enter]
           end
         end

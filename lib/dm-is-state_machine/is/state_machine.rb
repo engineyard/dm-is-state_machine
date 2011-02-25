@@ -56,9 +56,7 @@ module DataMapper
         # end
 
         before :destroy do
-          puts "before destroy"
           if @state_machine.find_event(:destroy)
-            puts "found destroy event"
             transition!(:destroy)
           end
         end
@@ -111,7 +109,6 @@ module DataMapper
         end
 
         def transition!(event_name)
-          puts "transition to #{event_name}"
           @state_machine.fire_event(event_name)
         end
 
