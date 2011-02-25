@@ -26,15 +26,19 @@ module DataMapper
         # +transition+ takes a hash where <tt>:to</tt> is the state to transition
         # to and <tt>:from</tt> is a state (or Array of states) from which this
         # event can be fired.
-        def event(name, &block)
+        def event(name, options = {}, &block)
           unless state_machine_context?(:is)
             raise InvalidContext, "Valid only in 'is :state_machine' block"
           end
 
+          name = name.to_s
+
+          options[:method] = true unless options.key?(:method)
+
           # ===== Setup context =====
-          machine = @is_state_machine[:machine]
-          event = Data::Event.new(name, machine)
-          machine.events << event
+          definition = @is_state_machine[:definition]
+          event = Data::Event.new(name, definition)
+          definition.events << event
           @is_state_machine[:event] = {
             :name   => name,
             :object => event
@@ -42,8 +46,11 @@ module DataMapper
           push_state_machine_context(:event)
 
           # ===== Define methods =====
-          define_method("#{name}!") do
-            transition!(name)
+          if options[:method]
+            define_method("#{name}!") do
+              puts "transitioning to #{name.inspect}"
+              transition!(name)
+            end
           end
 
           # Possible alternative to the above:
@@ -72,7 +79,8 @@ module DataMapper
 
           from = options[:from]
           to   = options[:to]
-          event_object.add_transition(from, to)
+          via  = options[:via]
+          event_object.add_transition(from, to, via)
         end
 
       end # EventDsl

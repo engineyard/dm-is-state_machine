@@ -29,9 +29,9 @@ module DataMapper
           end
 
           # ===== Setup context =====
-          machine = @is_state_machine[:machine]
-          state = Data::State.new(name, machine, options)
-          machine.states << state
+          definition = @is_state_machine[:definition]
+          state = Data::State.new(name, definition, options)
+          definition.states << state
         end
 
       end # StateDsl
