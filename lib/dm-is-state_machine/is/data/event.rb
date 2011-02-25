@@ -13,8 +13,8 @@ module DataMapper
             @transitions = []
           end
 
-          def add_transition(from, to)
-            @transitions << { :from => from, :to => to }
+          def add_transition(from, to, via)
+            @transitions << { :from => from, :to => to, :via => via }
           end
 
         end

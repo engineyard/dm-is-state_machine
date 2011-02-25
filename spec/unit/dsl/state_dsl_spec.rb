@@ -10,7 +10,7 @@ describe "StateDsl" do
         stub!(:state_machine_context?).and_return(true)
       end
       machine = mock("machine", :states => [])
-      Earth.instance_variable_set(:@is_state_machine, { :machine => machine })
+      Earth.instance_variable_set(:@is_state_machine, { :definition => machine })
     end
 
     it "declaration should succeed" do

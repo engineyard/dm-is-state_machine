@@ -3,10 +3,78 @@ module DataMapper
     module StateMachine
       module Data
 
+        class Machine
+          def initialize(definition, resource)
+            @definition = definition
+            @resource = resource
+          end
+
+          def run_initial
+            return unless initial
+            @resource.attribute_set(@definition.column, initial)
+            return unless initial_state = @definition.find_state(initial)
+            run_hook_if_present initial_state.options[:enter]
+          end
+
+          # hook may be either a Proc or symbol
+          def run_hook_if_present(hook)
+            return unless hook
+            if hook.respond_to?(:call)
+              hook.call(@resource)
+            else
+              @resource.__send__(hook)
+            end
+          end
+
+          def initial
+            @definition.initial
+          end
+
+          def find_event(event_name)
+            @definition.find_event(event_name)
+          end
+
+          def fire_event(event_name)
+            transition = @definition.fire_event(event_name, self)
+
+            if via_state_name = transition[:via]
+              self.current_state_name = via_state_name
+            end
+
+            # == Change the current_state ==
+            self.current_state_name = transition[:to]
+          end
+
+          # Return the current state
+          #
+          # @api public
+          def current_state
+            @definition.find_state(current_state_name)
+            # TODO: add caching, i.e. with `@current_state ||= ...`
+          end
+
+          def current_state_name
+            @resource.attribute_get(@definition.column).to_s
+          end
+
+          def current_state_name=(state_name)
+            # == Run :exit hook (if present) ==
+            puts "exiting #{current_state_name}"
+            run_hook_if_present current_state.options[:exit]
+
+            @resource.update(@definition.column => state_name.to_s)
+            puts "state set to #{state_name}"
+
+            # == Run :enter hook (if present) ==
+            puts "entering #{current_state_name}"
+            run_hook_if_present current_state.options[:enter]
+          end
+        end
+
         # This Machine class represents one state machine.
         #
         # A model (i.e. a DataMapper resource) can have more than one Machine.
-        class Machine
+        class MachineDefinition
 
           # The property of the DM resource that will hold this Machine's
           # state.
@@ -17,12 +85,6 @@ module DataMapper
           # The initial value of this Machine's state
           attr_accessor :initial
 
-          # The current value of this Machine's state
-          #
-          # This is the "primary control" of this Machine's state.  All
-          # other methods key off the value of @current_state_name.
-          attr_accessor :current_state_name
-
           attr_accessor :events
 
           attr_accessor :states
@@ -30,40 +92,24 @@ module DataMapper
           def initialize(column, initial)
             @column, @initial   = column, initial
             @events, @states    = [], []
-            @current_state_name = initial
           end
 
           # Fire (activate) the event with name +event_name+
           #
           # @api public
-          def fire_event(event_name, resource)
+          def fire_event(event_name, machine)
+            event_name = event_name.to_s
             unless event = find_event(event_name)
               raise InvalidEvent, "Could not find event (#{event_name.inspect})"
             end
             transition = event.transitions.find do |t|
-               t[:from].to_s == @current_state_name.to_s
+               t[:from].to_s == machine.current_state_name
             end
             unless transition
-              raise InvalidEvent, "Event (#{event_name.inspect}) does not" +
-              "exist for current state (#{@current_state_name.inspect})"
+              raise InvalidEvent, "Event (#{event_name.inspect}) does not " +
+              "exist for current state (#{machine.current_state_name.inspect})"
             end
-
-            # == Run :exit hook (if present) ==
-            resource.run_hook_if_present current_state.options[:exit]
-
-            # == Change the current_state ==
-            @current_state_name = transition[:to]
-
-            # == Run :enter hook (if present) ==
-            resource.run_hook_if_present current_state.options[:enter]
-          end
-
-          # Return the current state
-          #
-          # @api public
-          def current_state
-            find_state(@current_state_name)
-            # TODO: add caching, i.e. with `@current_state ||= ...`
+            transition
           end
 
           # Find event whose name is +event_name+

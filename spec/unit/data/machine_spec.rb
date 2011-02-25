@@ -2,7 +2,7 @@ require 'spec_helper'
 
 module MachineHelper
   def new_machine(*args)
-    DataMapper::Is::StateMachine::Data::Machine.new(*args)
+    DataMapper::Is::StateMachine::Data::MachineDefinition.new(*args)
   end
 
   def new_state(name, machine, options = {})
@@ -14,10 +14,10 @@ module MachineHelper
   end
 end
 
-describe DataMapper::Is::StateMachine::Data::Machine do
+describe DataMapper::Is::StateMachine::Data::MachineDefinition do
   include MachineHelper
 
-  describe "new Machine, no events" do
+  describe "new MachineDefinition, no events" do
     before(:each) do
       @machine = new_machine(:power, :off)
     end

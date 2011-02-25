@@ -12,7 +12,7 @@ describe "EventDsl" do
         stub!(:pop_state_machine_context)
       end
       machine = mock("machine", :events => [], :column => :state)
-      Earth.instance_variable_set(:@is_state_machine, { :machine => machine })
+      Earth.instance_variable_set(:@is_state_machine, { :definition => machine })
     end
 
     it "declaration should succeed" do
@@ -39,7 +39,7 @@ describe "EventDsl" do
       event = mock("sunrise_event")
       event.stub!(:add_transition)
       Earth.instance_variable_set(:@is_state_machine, {
-        :machine => machine,
+        :definition => machine,
         :event   => { :name => :sunrise, :object => event }
       })
     end

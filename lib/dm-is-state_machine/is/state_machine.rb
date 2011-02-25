@@ -35,8 +35,8 @@ module DataMapper
         unless properties.detect { |p| p.name == column }
           property column, String, :default => initial
         end
-        machine = Data::Machine.new(column, initial)
-        @is_state_machine = { :machine => machine }
+        definition = Data::MachineDefinition.new(column, initial)
+        @is_state_machine = { :definition => definition }
 
         class_eval <<-RUBY, __FILE__, __LINE__ + 1
           def #{column}=(value)
@@ -56,7 +56,11 @@ module DataMapper
         # end
 
         before :destroy do
-          # Do we need to do anything here?
+          puts "before destroy"
+          if @state_machine.find_event(:destroy)
+            puts "found destroy event"
+            transition!(:destroy)
+          end
         end
 
         # ===== Setup context =====
@@ -101,28 +105,18 @@ module DataMapper
           super
           # ===== Run :enter hook if present =====
           return unless is_sm = model.instance_variable_get(:@is_state_machine)
-          return unless machine = is_sm[:machine]
-          return unless initial = machine.initial
-          return unless initial_state = machine.find_state(initial)
-          run_hook_if_present initial_state.options[:enter]
-        end
-
-        # hook may be either a Proc or symbol
-        def run_hook_if_present(hook)
-          return unless hook
-          if hook.respond_to?(:call)
-            hook.call(self)
-          else
-            __send__(hook)
-          end
+          return unless definition = is_sm[:definition]
+          @state_machine = Data::Machine.new(definition, self)
+          @state_machine.run_initial
         end
 
         def transition!(event_name)
-          machine = model.instance_variable_get(:@is_state_machine)[:machine]
-          column = machine.column
-          machine.current_state_name = __send__(column)
-          machine.fire_event(event_name, self)
-          __send__("#{column}=", machine.current_state_name)
+          puts "transition to #{event_name}"
+          @state_machine.fire_event(event_name)
+        end
+
+        def state_machine
+          @state_machine
         end
 
       end # InstanceMethods
