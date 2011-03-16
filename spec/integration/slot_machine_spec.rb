@@ -41,15 +41,15 @@ describe SlotMachine do
     end
 
     it "turn_on! should work from off mode" do
-      @sm.turn_on!
+      @sm.transition!(:turn_on)
       @sm.mode.should == "idle"
       @sm.power_on.should == true
     end
 
     it "turn_on! should not work twice in a row" do
-      @sm.turn_on!
+      @sm.transition!(:turn_on)
       lambda {
-        @sm.turn_on!
+        @sm.transition!(:turn_on)
       }.should raise_error(DataMapper::Is::StateMachine::InvalidEvent)
     end
 
@@ -65,20 +65,20 @@ describe SlotMachine do
 
     it "turn_on! should raise error" do
       lambda {
-        @sm.turn_on!
+        @sm.transition!(:turn_on)
       }.should raise_error(DataMapper::Is::StateMachine::InvalidEvent)
     end
 
     it "turn_off! should work" do
-      @sm.turn_off!
+      @sm.transition!(:turn_off)
       @sm.mode.should == "off"
       @sm.power_on.should == false
     end
 
     it "turn_off! should not work twice in a row" do
-      @sm.turn_off!
+      @sm.transition!(:turn_off)
       lambda {
-        @sm.turn_off!
+        @sm.transition!(:turn_off)
       }.should raise_error(DataMapper::Is::StateMachine::InvalidEvent)
     end
 

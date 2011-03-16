@@ -35,19 +35,15 @@ describe TrafficLight do
 
   describe 'forward!' do
 
-    it "should respond to :forward!" do
-      @t.respond_to?(:forward!).should == true
-    end
-
     it "should transition to :yellow, :red, :green" do
       @t.color.should == "green"
-      @t.forward!
+      @t.transition!(:forward)
       @t.color.should == "yellow"
       @t.log.should == %w(G Y)
-      @t.forward!
+      @t.transition!(:forward)
       @t.color.should == "red"
       @t.log.should == %w(G Y R)
-      @t.forward!
+      @t.transition!(:forward)
       @t.color.should == "green"
       @t.log.should == %w(G Y R G)
     end
@@ -57,13 +53,13 @@ describe TrafficLight do
       @t.save
       @t.color.should == "yellow"
       @t.log.should == %w(G)
-      @t.forward!
+      @t.transition!(:forward)
       @t.color.should == "red"
       @t.log.should == %w(G R)
-      @t.forward!
+      @t.transition!(:forward)
       @t.color.should == "green"
       @t.log.should == %w(G R G)
-      @t.forward!
+      @t.transition!(:forward)
       @t.color.should == "yellow"
       @t.log.should == %w(G R G Y)
     end
@@ -73,13 +69,13 @@ describe TrafficLight do
       @t.save
       @t.color.should == "red"
       @t.log.should == %w(G)
-      @t.forward!
+      @t.transition!(:forward)
       @t.color.should == "green"
       @t.log.should == %w(G G)
-      @t.forward!
+      @t.transition!(:forward)
       @t.color.should == "yellow"
       @t.log.should == %w(G G Y)
-      @t.forward!
+      @t.transition!(:forward)
       @t.color.should == "red"
       @t.log.should == %w(G G Y R)
     end
@@ -88,20 +84,16 @@ describe TrafficLight do
 
   describe 'backward!' do
 
-    it "should respond to 'backward!'" do
-      @t.respond_to?(:backward!).should == true
-    end
-
     it "should transition to :red, :yellow, :green" do
       @t.color.should == "green"
       @t.log.should == %w(G)
-      @t.backward!
+      @t.transition!(:backward)
       @t.color.should == "red"
       @t.log.should == %w(G R)
-      @t.backward!
+      @t.transition!(:backward)
       @t.color.should == "yellow"
       @t.log.should == %w(G R Y)
-      @t.backward!
+      @t.transition!(:backward)
       @t.color.should == "green"
       @t.log.should == %w(G R Y G)
     end
@@ -111,13 +103,13 @@ describe TrafficLight do
       @t.save
       @t.color.should == "yellow"
       @t.log.should == %w(G)
-      @t.backward!
+      @t.transition!(:backward)
       @t.color.should == "green"
       @t.log.should == %w(G G)
-      @t.backward!
+      @t.transition!(:backward)
       @t.color.should == "red"
       @t.log.should == %w(G G R)
-      @t.backward!
+      @t.transition!(:backward)
       @t.color.should == "yellow"
       @t.log.should == %w(G G R Y)
     end
@@ -127,13 +119,13 @@ describe TrafficLight do
       @t.save
       @t.color.should == "red"
       @t.log.should == %w(G)
-      @t.backward!
+      @t.transition!(:backward)
       @t.color.should == "yellow"
       @t.log.should == %w(G Y)
-      @t.backward!
+      @t.transition!(:backward)
       @t.color.should == "green"
       @t.log.should == %w(G Y G)
-      @t.backward!
+      @t.transition!(:backward)
       @t.color.should == "red"
       @t.log.should == %w(G Y G R)
     end
@@ -143,20 +135,20 @@ describe TrafficLight do
   describe "hooks" do
 
     it "should log initial state before state is changed on a before hook" do
-      @t.forward!
+      @t.transition!(:forward)
       @t.before_hook_log.should == %w(green)
-      @t.forward!
+      @t.transition!(:forward)
       @t.before_hook_log.should == %w(green yellow)
-      @t.forward!
+      @t.transition!(:forward)
       @t.before_hook_log.should == %w(green yellow red)
     end
 
     it "should log final state before state is changed on a before hook" do
-      @t.forward!
+      @t.transition!(:forward)
       @t.after_hook_log.should == %w(yellow)
-      @t.forward!
+      @t.transition!(:forward)
       @t.after_hook_log.should == %w(yellow red)
-      @t.forward!
+      @t.transition!(:forward)
       @t.after_hook_log.should == %w(yellow red green)
     end
 
@@ -165,12 +157,12 @@ describe TrafficLight do
   describe "overwriting event methods" do
 
     before(:all) do
-      TrafficLight.class_eval "def forward!(added_param); log << added_param; transition!(:forward); end"
+      TrafficLight.class_eval "def transition!(name, added_param); if name == :forward; log << added_param; end; state_machine.fire_event(name); end"
     end
 
     it "should transition normally with added functionality" do
       @t.color.should == "green"
-      @t.forward!("test")
+      @t.transition!(:forward, "test")
       @t.color.should == "yellow"
       @t.log.should == %w(G test Y)
     end
