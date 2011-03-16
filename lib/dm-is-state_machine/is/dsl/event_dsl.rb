@@ -31,10 +31,6 @@ module DataMapper
             raise InvalidContext, "Valid only in 'is :state_machine' block"
           end
 
-          if method_defined?("#{name}!")
-            raise InvalidEvent, "There is a method called #{name}! on #{self}"
-          end
-
           event_object = create_event(name)
 
           # ===== Setup context =====
@@ -43,22 +39,6 @@ module DataMapper
             :object => event_object
           }
           push_state_machine_context(:event)
-
-          # ===== Define methods =====
-          define_method("#{name}!") do
-            transition!(name)
-          end
-
-          # Possible alternative to the above:
-          # (class_eval is typically faster than define_method)
-          #
-          # self.class_eval <<-RUBY, __FILE__, __LINE__ + 1
-          #   def #{name}!
-          #     machine.current_state_name = __send__(:"#{column}")
-          #     machine.fire_event(name, self)
-          #     __send__(:"#{column}="), machine.current_state_name
-          #   end
-          # RUBY
 
           yield if block_given?
 
