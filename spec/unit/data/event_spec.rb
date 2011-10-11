@@ -21,7 +21,7 @@ describe DataMapper::Is::StateMachine::Data::Event do
   end
 
   it "#add_transition should work" do
-    @event.add_transition(:nothing, :pinged, :ping)
-    @event.transitions.should == [{:from => :nothing, :to => :pinged, :via => :ping }]
+    @event.add_transition(:nothing, :pinged, :ping, :pang)
+    @event.transitions.should == [{:from => :nothing, :to => :pinged, :via => :ping , :error => :pang}]
   end
 end
