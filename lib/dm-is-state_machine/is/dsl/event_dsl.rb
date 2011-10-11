@@ -52,10 +52,11 @@ module DataMapper
           end
 
           event_object = create_event(:destroy)
-          from = options[:from]
-          to   = options[:to]
-          via  = options[:via]
-          event_object.add_transition(from, to, via)
+          from  = options[:from]
+          to    = options[:to]
+          via   = options[:via]
+          error = options[:error]
+          event_object.add_transition(from, to, via, error)
         end
 
         def create_event(name)
@@ -78,10 +79,11 @@ module DataMapper
           event_name   = @is_state_machine[:event][:name]
           event_object = @is_state_machine[:event][:object]
 
-          from = options[:from]
-          to   = options[:to]
-          via  = options[:via]
-          event_object.add_transition(from, to, via)
+          from  = options[:from]
+          to    = options[:to]
+          via   = options[:via]
+          error = options[:error]
+          event_object.add_transition(from, to, via, error)
         end
 
       end # EventDsl

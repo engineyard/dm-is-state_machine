@@ -44,12 +44,18 @@ module DataMapper
           def fire_event(event_name)
             transition = @definition.fire_event(event_name, current_state_name)
 
-            if via_state_name = transition[:via]
-              self.current_state_name = via_state_name
+            begin
+              if via_state_name = transition[:via]
+                self.current_state_name = via_state_name
+              end
+              # == Change the current_state ==
+              self.current_state_name = transition[:to]
+            rescue Exception => e
+              if error_state = transition[:error]
+                @resource.update!(@definition.column => error_state)
+              end
+              raise
             end
-
-            # == Change the current_state ==
-            self.current_state_name = transition[:to]
           end
 
           # Return the current state
