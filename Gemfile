@@ -16,16 +16,6 @@ gem 'ardm-core', DM_VERSION,
   SOURCE  => "#{DATAMAPPER}/ardm-core#{REPO_POSTFIX}",
   :branch => CURRENT_BRANCH
 
-platforms :mri_18 do
-  group :quality do
-
-    gem 'rcov',      '~> 0.9.10'
-    gem 'yard',      '~> 0.7.2'
-    gem 'yardstick', '~> 0.4'
-
-  end
-end
-
 group :datamapper do
 
   adapters = ENV['ADAPTER'] || ENV['ADAPTERS']
