@@ -4,6 +4,7 @@ module DataMapper
       module Data
 
         class Machine
+          attr_reader :definition, :resource
           def initialize(definition, resource)
             @definition = definition
             @resource = resource
