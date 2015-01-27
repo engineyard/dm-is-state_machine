@@ -6,14 +6,14 @@ gemspec
 
 SOURCE         = ENV.fetch('SOURCE', :git).to_sym
 REPO_POSTFIX   = SOURCE == :path ? ''                                : '.git'
-DATAMAPPER     = SOURCE == :path ? Pathname(__FILE__).dirname.parent : 'http://github.com/datamapper'
+DATAMAPPER     = SOURCE == :path ? Pathname(__FILE__).dirname.parent : 'http://github.com/ar-dm'
 DM_VERSION     = '~> 1.2.0'
 DO_VERSION     = '~> 0.10.6'
 DM_DO_ADAPTERS = %w[ sqlite postgres mysql oracle sqlserver ]
 CURRENT_BRANCH = ENV.fetch('GIT_BRANCH', 'master')
 
-gem 'dm-core', DM_VERSION,
-  SOURCE  => "#{DATAMAPPER}/dm-core#{REPO_POSTFIX}",
+gem 'ardm-core', DM_VERSION,
+  SOURCE  => "#{DATAMAPPER}/ardm-core#{REPO_POSTFIX}",
   :branch => CURRENT_BRANCH
 
 platforms :mri_18 do
@@ -42,19 +42,19 @@ group :datamapper do
       gem "do_#{adapter}", DO_VERSION, do_options.dup
     end
 
-    gem 'dm-do-adapter', DM_VERSION,
-      SOURCE  => "#{DATAMAPPER}/dm-do-adapter#{REPO_POSTFIX}",
+    gem 'ardm-do-adapter', DM_VERSION,
+      SOURCE  => "#{DATAMAPPER}/ardm-do-adapter#{REPO_POSTFIX}",
       :branch => CURRENT_BRANCH
   end
 
   adapters.each do |adapter|
-    gem "dm-#{adapter}-adapter", DM_VERSION,
-      SOURCE  => "#{DATAMAPPER}/dm-#{adapter}-adapter#{REPO_POSTFIX}",
+    gem "ardm-#{adapter}-adapter", DM_VERSION,
+      SOURCE  => "#{DATAMAPPER}/ardm-#{adapter}-adapter#{REPO_POSTFIX}",
       :branch => CURRENT_BRANCH
   end
 
   plugins = ENV['PLUGINS'] || ENV['PLUGIN']
-  plugins = plugins.to_s.tr(',', ' ').split.push('dm-migrations').uniq
+  plugins = plugins.to_s.tr(',', ' ').split.push('ardm-migrations').uniq
 
   plugins.each do |plugin|
     gem plugin, DM_VERSION,
